@@ -63,18 +63,18 @@ const defragmentImageData = (image: ImageData): ImageData => {
   }
 
   pixels.sort((a, b) => {
-    if (a === b) return 0;
+    const [ar, ag, ab, aa] = a;
+    const [br, bg, bb, ba] = b;
 
-    const aSum = a.reduce((x, y) => x + y, 0);
-    const bSum = b.reduce((x, y) => x + y, 0);
+    if (ar != br) return ar - br;
+    if (ag != bg) return ag - bg;
+    if (ab != bb) return ab - bb;
+    if (aa != ba) return aa - ba;
 
-    return aSum - bSum;
-  })
-
+    return 0;
+  });
 
   const newRgba = new Uint8ClampedArray(pixels.flat());
-  console.log(rgba)
-  console.log(newRgba);
   return new ImageData(newRgba, image.width, image.height);
 }
 
@@ -103,7 +103,7 @@ function App() {
   return (
     <div className="App">
       <input type="file" onChange={onImageSelected} />
-      { originalImage && <img alt="original" src={originalImage} style={{ width: "100%" }} />}
+      {originalImage && <img alt="original" src={originalImage} style={{ width: "100%" }} />}
       {defragImage && <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />}
     </div>
   );
