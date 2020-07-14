@@ -28,7 +28,7 @@ const loadImage = async (src: string): Promise<HTMLImageElement> => {
   })
 }
 
-const base64ImageToPixels = async (base64Image: string): Promise<ImageData> => {
+const base64ToImageData = async (base64Image: string): Promise<ImageData> => {
   const image = await loadImage(base64Image);
 
   const canvas = document.createElement('canvas');
@@ -41,7 +41,7 @@ const base64ImageToPixels = async (base64Image: string): Promise<ImageData> => {
   return context!.getImageData(0, 0, image.width, image.height);
 }
 
-const pixelsToBase64Image = (imageData: ImageData): string => {
+const imageDataToBase64 = (imageData: ImageData): string => {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
 
@@ -53,28 +53,58 @@ const pixelsToBase64Image = (imageData: ImageData): string => {
   return canvas.toDataURL()
 }
 
+const defragmentImageData = (image: ImageData): ImageData => {
+  const rgba = image.data;
+  let pixels = [];
+
+  // Split out rgba pixels
+  for (let index = 0; index < rgba.length - 3; index += 4) {
+    pixels.push([rgba[index], rgba[index+1], rgba[index+2], rgba[index+3]]);
+  }
+
+  pixels.sort((a, b) => {
+    if (a === b) return 0;
+
+    const aSum = a.reduce((x, y) => x + y, 0);
+    const bSum = b.reduce((x, y) => x + y, 0);
+
+    return aSum - bSum;
+  })
+
+
+  const newRgba = new Uint8ClampedArray(pixels.flat());
+  console.log(rgba)
+  console.log(newRgba);
+  return new ImageData(newRgba, image.width, image.height);
+}
+
+const defragmentBase64 = async (base64Image: string): Promise<string> => {
+  const imageData = await base64ToImageData(base64Image);
+  const defrag = defragmentImageData(imageData);
+  return imageDataToBase64(defrag);
+
+}
+
 function App() {
-  const [original, setOriginal] = useState<string>();
-  const [defrag, setDefrag] = useState<string>();
+  const [originalImage, setOriginal] = useState<string>();
+  const [defragImage, setDefrag] = useState<string>();
 
   const onImageSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
     const imageFile = event.target.files[0];
 
-    const originalImage = await readImageFileToBase64(imageFile);
-    setOriginal(originalImage);
+    const original = await readImageFileToBase64(imageFile);
+    setOriginal(original);
 
-    const pixels = await base64ImageToPixels(originalImage);
-    console.log(pixels.data.slice(100, 130));
-    const defragged = pixelsToBase64Image(pixels);
-    setDefrag(defragged);
+    const defrag = await defragmentBase64(original);
+    setDefrag(defrag);
   }
 
   return (
     <div className="App">
       <input type="file" onChange={onImageSelected} />
-      <img alt="original" src={original} style={{ width: "100%" }} />
-      <img alt="defragmented" src={defrag} style={{ width: "100%" }} />
+      { originalImage && <img alt="original" src={originalImage} style={{ width: "100%" }} />}
+      {defragImage && <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />}
     </div>
   );
 }
