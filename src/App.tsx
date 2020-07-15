@@ -114,12 +114,12 @@ function App() {
         <main>
           <section>
             <h2>Original</h2>
-            <img alt="original" src={originalImage} style={{ width: "100%" }} />
+            <img alt="original" src={originalImage} />
           </section>
 
           <section>
             {defragImage ? <h2>Defragmented</h2> : <h2>Defragmenting...</h2>}
-            {defragImage && <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />}
+            {defragImage && <img alt="defragmented" src={defragImage} />}
           </section>
         </main>
       }
