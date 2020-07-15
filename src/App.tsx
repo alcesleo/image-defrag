@@ -105,20 +105,23 @@ function App() {
 
   return (
     <div className="App">
-      <input type="file" onChange={onImageSelected} />
+      <header>
+        <h1>Image Defrag</h1>
+        <input type="file" onChange={onImageSelected} />
+      </header>
 
       {originalImage &&
-        <section>
-          <h2>Original</h2>
-          <img alt="original" src={originalImage} style={{ width: "100%" }} />
-        </section>
-      }
-      {originalImage && !defragImage && <h2>Defragmenting...</h2>}
-      {defragImage &&
-        <section>
-          <h2>Defragmented</h2>
-          <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />
-        </section>
+        <main>
+          <section>
+            <h2>Original</h2>
+            <img alt="original" src={originalImage} style={{ width: "100%" }} />
+          </section>
+
+          <section>
+            {defragImage ? <h2>Defragmented</h2> : <h2>Defragmenting...</h2>}
+            {defragImage && <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />}
+          </section>
+        </main>
       }
     </div>
   );
