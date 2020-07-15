@@ -57,25 +57,27 @@ const defragmentImageData = (image: ImageData): ImageData => {
   const rgba = image.data;
   let pixels = [];
 
-  // Split out rgba pixels
+  console.log("Extracting pixel data...");
   for (let index = 0; index < rgba.length - 3; index += 4) {
     pixels.push([rgba[index], rgba[index+1], rgba[index+2], rgba[index+3]]);
   }
 
+  console.log("Defragmenting pixels");
   pixels.sort((a, b) => {
     const [ar, ag, ab, aa] = a;
     const [br, bg, bb, ba] = b;
 
-    if (ar != br) return ar - br;
-    if (ag != bg) return ag - bg;
-    if (ab != bb) return ab - bb;
-    if (aa != ba) return aa - ba;
+    if (ar !== br) return ar - br;
+    if (ag !== bg) return ag - bg;
+    if (ab !== bb) return ab - bb;
+    if (aa !== ba) return aa - ba;
 
     return 0;
   });
 
-  const newRgba = new Uint8ClampedArray(pixels.flat());
-  return new ImageData(newRgba, image.width, image.height);
+  console.log("Done!");
+  const defragRgba = new Uint8ClampedArray(pixels.flat());
+  return new ImageData(defragRgba, image.width, image.height);
 }
 
 const defragmentBase64 = async (base64Image: string): Promise<string> => {
@@ -95,6 +97,7 @@ function App() {
 
     const original = await readImageFileToBase64(imageFile);
     setOriginal(original);
+    setDefrag(undefined);
 
     const defrag = await defragmentBase64(original);
     setDefrag(defrag);
@@ -103,8 +106,20 @@ function App() {
   return (
     <div className="App">
       <input type="file" onChange={onImageSelected} />
-      {originalImage && <img alt="original" src={originalImage} style={{ width: "100%" }} />}
-      {defragImage && <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />}
+
+      {originalImage &&
+        <section>
+          <h2>Original</h2>
+          <img alt="original" src={originalImage} style={{ width: "100%" }} />
+        </section>
+      }
+      {originalImage && !defragImage && <h2>Defragmenting...</h2>}
+      {defragImage &&
+        <section>
+          <h2>Defragmented</h2>
+          <img alt="defragmented" src={defragImage} style={{ width: "100%" }} />
+        </section>
+      }
     </div>
   );
 }
