@@ -53,7 +53,7 @@ const imageDataToBase64 = (imageData: ImageData): string => {
   canvas.width = imageData.width;
   canvas.height = imageData.height;
   context.putImageData(imageData, 0, 0);
-  return canvas.toDataURL()
+  return canvas.toDataURL();
 }
 
 const defragmentImageData = (image: ImageData): ImageData => {
@@ -61,19 +61,24 @@ const defragmentImageData = (image: ImageData): ImageData => {
   let pixels = [];
 
   console.log("Extracting pixel data...");
-  for (let index = 0; index < rgba.length - 3; index += 4) {
-    pixels.push([rgba[index], rgba[index+1], rgba[index+2], rgba[index+3]]);
+  for (let index = 0; index <= rgba.length - 4; index += 4) {
+    pixels.push([
+        rgba[index],
+        rgba[index+1],
+        rgba[index+2],
+        rgba[index+3]
+    ]);
   }
 
   console.log("Defragmenting pixels");
-  pixels.sort((a, b) => {
-    const [ar, ag, ab, aa] = a;
-    const [br, bg, bb, ba] = b;
+  pixels.sort((pixel1, pixel2) => {
+    const [r1, g1, b1, a1] = pixel1;
+    const [r2, g2, b2, a2] = pixel2;
 
-    if (ar !== br) return ar - br;
-    if (ag !== bg) return ag - bg;
-    if (ab !== bb) return ab - bb;
-    if (aa !== ba) return aa - ba;
+    if (r1 !== r2) return r1 - r2;
+    if (g1 !== g2) return g1 - g2;
+    if (b1 !== b2) return b1 - b2;
+    if (a1 !== a2) return a1 - a2;
 
     return 0;
   });
